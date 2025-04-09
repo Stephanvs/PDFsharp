@@ -1754,6 +1754,9 @@ namespace PdfSharp.Pdf.IO
             DateTime datetime = errorValue;
             try
             {
+                //"String '20230220205126' was not recognized as a valid DateTime. Error in 31__044.PDF
+                if (double.TryParse(date, out _) && date.Length == 14)
+                    date = "D:" + date;
                 if (date.StartsWith("D:", StringComparison.Ordinal))
                 {
                     // Format is

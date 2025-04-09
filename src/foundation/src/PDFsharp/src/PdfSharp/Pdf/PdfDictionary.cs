@@ -486,10 +486,22 @@ namespace PdfSharp.Pdf
                     PdfStringObject strObject => strObject.Value,
                     PdfName name => name.Value,
                     PdfNameObject nameObject => nameObject.Value,
+                    PdfArray arrayObject => GetArrayString(arrayObject),
                     _ => throw new InvalidCastException("GetString: Object is not a string.")
                 };
             }
-
+            private string GetArrayString(PdfArray arrayObject)
+            {
+                var str = string.Empty;
+                foreach (PdfItem obj in arrayObject)
+                {
+                    if (obj is PdfString s)
+                        str += s.Value;
+                    else if (obj is PdfName n)
+                        str += n.Value;
+                }
+                return str;
+            }
             /// <summary>
             /// Converts the specified value to String.
             /// If the value does not exist, the function returns the empty string.
