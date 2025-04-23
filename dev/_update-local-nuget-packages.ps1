@@ -36,8 +36,8 @@ Get-ChildItem -Path . -Filter *.nupkg -Recurse -ErrorAction SilentlyContinue -Fo
     if ($_.FullName -match "bin\\$config|bin\/$config") {
         Copy-Item $_.FullName -Destination ("$nugetLocal\" + $_.Name)
 
-        Write-Host "Nuget package version to publish: $_.FullName"
-		dotnet nuget push *.nupkg --api-key $env:NEXUS_API_KEY --source https://nlib-tf.prosim-ar.eu/repository/nuget-hosted/;
+        Write-Host "Nuget package version to publish: $_"
+		dotnet nuget push $_ --api-key $env:NEXUS_API_KEY --source https://nlib-tf.prosim-ar.eu/repository/nuget-hosted/;
 
         $packages += $_.Name
     }
