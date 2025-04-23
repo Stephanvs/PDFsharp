@@ -8,6 +8,10 @@ param (
     [Parameter(Mandatory = $false)] [bool]$deleteAllPackageVersions = $true
 )
 
+if (-not $env:NEXUS_API_KEY) {
+	throw "The environment variable NEXUS_API_KEY is not set."
+}
+
 $userprofile = $env:USERPROFILE # Windows
 if (!$userprofile) {
     $userprofile = $env:HOME # Linux
@@ -31,6 +35,10 @@ $packages = @()
 Get-ChildItem -Path . -Filter *.nupkg -Recurse -ErrorAction SilentlyContinue -Force | ForEach-Object {
     if ($_.FullName -match "bin\\$config|bin\/$config") {
         Copy-Item $_.FullName -Destination ("$nugetLocal\" + $_.Name)
+
+        Write-Host "Nuget package version to publish: $_.FullName"
+		dotnet nuget push *.nupkg --api-key $env:NEXUS_API_KEY --source https://nlib-tf.prosim-ar.eu/repository/nuget-hosted/;
+
         $packages += $_.Name
     }
 }
@@ -46,16 +54,17 @@ $packages | ForEach-Object {
     if (!$versions.Contains($version)) {
             $versions += $version
     }
+    dotnet push
     Get-ChildItem -Path $nuget -ErrorAction SilentlyContinue -Force | ForEach-Object {
         if ($_.Name -eq $package) {
             if ($deleteAllPackageVersions) {
-                Remove-Item -Path $_.FullName -Recurse -Force   
+                Remove-Item -Path $_.FullName -Recurse -Force
                 $count++
             }
             else {
                 Get-ChildItem -Path "$nuget\$package" -ErrorAction SilentlyContinue -Force | ForEach-Object {
                     if ($_.Name -eq $version) {
-                        Remove-Item -Path $_.FullName -Recurse -Force   
+                        Remove-Item -Path $_.FullName -Recurse -Force
                         $count++
                     }
                 }
